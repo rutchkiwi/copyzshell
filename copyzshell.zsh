@@ -14,10 +14,12 @@ else
 		exit 1
 	fi
 	
-	echo "2"
 	zsh_folder=${ZSH#$HOME/} # could be in multiple subfolders relative to $HOME TODO TEST!
 	zsh_base=${ZSH##*/}
+	zsh_folder_without_base=./${ZSH_folder%$zsh_base}
 	echo $zsh_folder
+	echo $zsh_folder_without_base
+	echo "2"
 	#mkdir -p
 
 	cd ~
@@ -35,30 +37,36 @@ else
 	# fi
 
 	datestr=$(date "+%Y-%m-%d-%H:%M:%S")
+	#TODO: better error msg in case of transfer failure (esp. permissions)
 	echo File transfer complete. We will now setup the shell via ssh.
 
 	#todo: take into account usernames!!
 	ssh -t $1 '
+
+	# this will be run in *gulp* bash ?
 	cd ~
+	#exit on failure!
 	
 	#check for pre-existing zsh folder!
-	if [[ -f $zsh_folder ]] then
-		echo Folder aldready exists!
-		#do stuff
+	if [[ -d '$zsh_folder' ]]; then
+		echo 1
+		echo Folder aldready exists!;
+		echo mv '$zsh_folder' '$zsh_folder'_'$datestr';
+		mv '$zsh_folder' '$zsh_folder_$datestr'; 
 	fi
-	mkdir -p '$zsh_folder'
-	echo mv /tmp/'$zsh_base'/* '$zsh_folder'
-	mv /tmp/'$zsh_base'/* '$zsh_folder'
+	mkdir -p '$zsh_folder_without_base'
+	echo mv /tmp/'$zsh_base' '$zsh_folder'
+	mv /tmp/'$zsh_base' '$zsh_folder'
 
 
 	if [ -f .zshrc ]; then 
 		mv .zshrc .zshrc_'$datestr' 
-		echo "An existing .zshrc was found. It was moved to .zshrc_'datestr'"
+		echo "An existing .zshrc was found. It was moved to .zshrc_'$datestr'"
 	fi
 
 	if [ -f .gitconfig ]; then 
 		mv .gitconfig .gitconfig_'$datestr'
-		echo "An existing .gitconfig was found. It was moved to .gitconfig_'datestr'"
+		echo "An existing .gitconfig was found. It was moved to .gitconfig_'$datestr'"
 	fi
 
 	mv /tmp/.zshrc .zshrc
@@ -66,7 +74,6 @@ else
 
 
 	chsh -s /bin/zsh'
-	rm .zshrc_new .gitconfig_new
 fi
 
 # Transfering .oh-my-zsh, .zshrc, .gitconfig and this script:
