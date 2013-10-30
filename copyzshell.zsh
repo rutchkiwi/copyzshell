@@ -25,18 +25,20 @@ else
 	cd ~
 	set -e
 	echo We will copy shell settings to $1
-	echo Transfering $ZSH, .zshrc and .gitconfig.
 	# We want to move all files in a batch so we don't have to ask for passwords so much.
 
 	# move our files into a subdirectory of tmp so that we don't have to worry about 
 	# permissions when overwriting old files on the remote machine.
 	# Otherwise, this can happen with .git objects when a previous run of this script
 	# failed for some reason.
-	tmpdir=/tmp/$datestr
+	echo Transfering $ZSH, .zshrc and .gitconfig.
+	tmpdir=/tmp/copyshell$datestr
 	mkdir $tmpdir
-	cp -r $ZSH $tmpdir
+	cp -r $ZSH $tmpdir/oh-my-zsh
+	echo cp -r $ZSH $tmpdir/oh-my-zsh
 	cp .zshrc $tmpdir
 	cp .gitconfig $tmpdir
+	echo "files should now be in "$tmpdir
 	scp -r $tmpdir $1:tmpdir
 
 	# rc=$?
@@ -59,15 +61,13 @@ else
 	# check for pre-existing zsh folder!
 	if [[ -d '$zsh_folder' ]]; then
 		echo 1
-		echo Folder aldready exists!;
-		echo mv '$zsh_folder' '$zsh_folder'_'$datestr';
+		echo '$ZSH_folder' aldready exists, copying it to '$zsh_folder'_'$datestr';
 		mv '$zsh_folder' '$zsh_folder_$datestr'; 
 	fi
 
 	#move the new zsh folder into position
 	mkdir -p '$zsh_folder_without_base'
-	echo mv '$tmpdir'/'$zsh_base' '$zsh_folder'
-	mv '$tmpdir'/'$zsh_base' '$zsh_folder'
+	mv '$tmpdir'/oh-my-zsh '$zsh_folder'
 
 	# check for pre-existing files
 	if [ -f .zshrc ]; then 
