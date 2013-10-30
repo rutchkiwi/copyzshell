@@ -10,24 +10,34 @@ else
 	zmodload zsh/regex
 	#check that the ZSH path is not wierd
 	if [[ ! $ZSH -regex-match ^$HOME/(.+) ]] then
-		echo "Your ZSH folder "$ZSH" doesn't seem to be in your home folder. Cowardly quitting"
+		echo "Your ZSH folder "$ZSH" doesn't seem to be in your home folder. Quitting"
 		exit 1
 	fi
 	
+	datestr=$(date "+%Y-%m-%d-%H:%M:%S")
 	zsh_folder=${ZSH#$HOME/} # could be in multiple subfolders relative to $HOME TODO TEST!
 	zsh_base=${ZSH##*/}
 	zsh_folder_without_base=./${ZSH_folder%$zsh_base}
 	echo $zsh_folder
 	echo $zsh_folder_without_base
-	echo "2"
 	#mkdir -p
 
 	cd ~
 	set -e
 	echo We will copy shell settings to $1
 	echo Transfering $ZSH, .zshrc and .gitconfig.
-	#doing this in a batch so we don't have to ask for password so much
-	scp -r $ZSH .zshrc .gitconfig $1:/tmp
+	# We want to move all files in a batch so we don't have to ask for passwords so much.
+
+	# move our files into a subdirectory of tmp so that we don't have to worry about 
+	# permissions when overwriting old files on the remote machine.
+	# Otherwise, this can happen with .git objects when a previous run of this script
+	# failed for some reason.
+	tmpdir=/tmp/$datestr
+	mkdir $tmpdir
+	cp -r $ZSH $tmpdir
+	cp .zshrc $tmpdir
+	cp .gitconfig $tmpdir
+	scp -r $tmpdir $1:tmpdir
 
 	# rc=$?
 	#DO NOT TRANSFER WIERD GIT FILES!
@@ -36,7 +46,6 @@ else
 	# 	exit $rc
 	# fi
 
-	datestr=$(date "+%Y-%m-%d-%H:%M:%S")
 	#TODO: better error msg in case of transfer failure (esp. permissions)
 	echo File transfer complete. We will now setup the shell via ssh.
 
@@ -45,33 +54,34 @@ else
 
 	# this will be run in *gulp* bash ?
 	cd ~
-	#exit on failure!
+	# exit on failure!
 	
-	#check for pre-existing zsh folder!
+	# check for pre-existing zsh folder!
 	if [[ -d '$zsh_folder' ]]; then
 		echo 1
 		echo Folder aldready exists!;
 		echo mv '$zsh_folder' '$zsh_folder'_'$datestr';
 		mv '$zsh_folder' '$zsh_folder_$datestr'; 
 	fi
+
+	#move the new zsh folder into position
 	mkdir -p '$zsh_folder_without_base'
-	echo mv /tmp/'$zsh_base' '$zsh_folder'
-	mv /tmp/'$zsh_base' '$zsh_folder'
+	echo mv '$tmpdir'/'$zsh_base' '$zsh_folder'
+	mv '$tmpdir'/'$zsh_base' '$zsh_folder'
 
-
+	# check for pre-existing files
 	if [ -f .zshrc ]; then 
 		mv .zshrc .zshrc_'$datestr' 
 		echo "An existing .zshrc was found. It was moved to .zshrc_'$datestr'"
 	fi
-
 	if [ -f .gitconfig ]; then 
 		mv .gitconfig .gitconfig_'$datestr'
 		echo "An existing .gitconfig was found. It was moved to .gitconfig_'$datestr'"
 	fi
 
-	mv /tmp/.zshrc .zshrc
-	mv /tmp/.gitconfig .gitconfig
-
+	# move the new files into position
+	mv '$tmpdir'/.zshrc .zshrc
+	mv '$tmpdir'/.gitconfig .gitconfig
 
 	chsh -s /bin/zsh'
 fi
