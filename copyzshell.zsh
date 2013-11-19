@@ -38,8 +38,9 @@ else
 	echo cp -r $ZSH $tmpdir/oh-my-zsh
 	cp .zshrc $tmpdir
 	cp .gitconfig $tmpdir
+	echo 	scp -r $tmpdir $1":"$tmpdir
+	scp -r $tmpdir $1":"$tmpdir
 	echo "files should now be in "$tmpdir
-	scp -r $tmpdir $1:tmpdir
 
 	# rc=$?
 	#DO NOT TRANSFER WIERD GIT FILES!
