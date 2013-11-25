@@ -86,13 +86,3 @@ else
 
 	chsh -s /bin/zsh'
 fi
-
-# Transfering .oh-my-zsh, .zshrc, .gitconfig and this script:
-# :~/: No such file or directory
-# We will now setup the shell via ssh.
-# ssh: Could not resolve hostname if [ -f .zshrc ]; then
-# 	mv .zshrc .zshrc_old;
-# 	echo "An existing .zshrc was found. It was moved to: nodename nor servname provided, or not known
-# /Users/viktor/oh-my-zsh-fork/plugins/copyshell/copyshell.plugin.zsh:22: parse error near `}'
-
-#no gitconfig
