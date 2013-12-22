@@ -6,7 +6,8 @@ elif [[ $1 = '-h' || $1 = '--help' ]] then
 	echo "HELP MSG"
 	exit 0 
 else
-	echo "OK LETS GO"
+	# exit on failure!
+	set -e
 	zmodload zsh/regex
 	#check that the ZSH path is not wierd
 	if [[ ! $ZSH -regex-match ^$HOME/(.+) ]] then
@@ -14,17 +15,16 @@ else
 		exit 1
 	fi
 	
-	datestr=$(date "+%Y-%m-%d-%H:%M:%S")
-	zsh_folder=${ZSH#$HOME/} # could be in multiple subfolders relative to $HOME TODO TEST!
-	zsh_base=${ZSH##*/}
-	zsh_folder_without_base=./${ZSH_folder%$zsh_base}
-	echo $zsh_folder
-	echo $zsh_folder_without_base
+	DATESTR=$(date "+%Y-%m-%d-%H:%M:%S")
+	ZSH_FOLDER=${ZSH#$HOME/} # could be in multiple subfolders relative to $HOME TODO TEST!
+	ZSH_BASE=${ZSH##*/}
+	ZSH_FOLDER_WITHOUT_BASE=./${ZSH_FOLDER%$ZSH_BASE}
+	echo $ZSH_FOLDER
+	echo $ZSH_FOLDER_WITHOUT_BASE
 	#mkdir -p
 
 	cd ~
-	set -e
-	echo We will copy shell settings to $1
+	
 	# We want to move all files in a batch so we don't have to ask for passwords so much.
 
 	# move our files into a subdirectory of tmp so that we don't have to worry about 
@@ -32,15 +32,15 @@ else
 	# Otherwise, this can happen with .git objects when a previous run of this script
 	# failed for some reason.
 	echo Transfering $ZSH, .zshrc and .gitconfig.
-	tmpdir=/tmp/copyshell$datestr
-	mkdir $tmpdir
-	cp -r $ZSH $tmpdir/oh-my-zsh
-	echo cp -r $ZSH $tmpdir/oh-my-zsh
-	cp .zshrc $tmpdir
-	cp .gitconfig $tmpdir
-	echo 	scp -r $tmpdir $1":"$tmpdir
-	scp -r $tmpdir $1":"$tmpdir
-	echo "files should now be in "$tmpdir
+	TMP_DIR=/tmp/copyshell_$DATESTR
+	mkdir $TMP_DIR
+	cp -r $ZSH $TMP_DIR/oh-my-zsh
+	echo cp -r $ZSH $TMP_DIR/oh-my-zsh
+	cp .zshrc $TMP_DIR
+	cp .gitconfig $TMP_DIR
+	echo 	scp -r $TMP_DIR $1":"$TMP_DIR
+	scp -r $TMP_DIR $1":"$TMP_DIR
+	echo "files should now be in "$TMP_DIR
 
 	# rc=$?
 	#DO NOT TRANSFER WIERD GIT FILES!
@@ -49,46 +49,44 @@ else
 	# 	exit $rc
 	# fi
 
-	#TODO: better error msg in case of transfer failure (esp. permissions)
-	echo File transfer complete. We will now setup the shell via ssh.
+	echo 'File transfer complete. We will now setup the shell via ssh.'
 
-	#todo: take into account usernames!!
-	ssh -t $1 '
-
-	# this will be run in *gulp* bash ? TODO: MAKE SURE IT DOES
+	remote_commands="
+	set -e
 	cd ~
-	# exit on failure!
 	
 	# check for pre-existing zsh folder!
-	if [[ -d '$zsh_folder' ]]; then
-		echo 1
-		echo '$ZSH_folder' aldready exists, copying it to '$zsh_folder'_'$datestr';
-		mv '$zsh_folder' '$zsh_folder_$datestr'; 
+	if [[ -d $ZSH_FOLDER ]]; then
+		echo $ZSH_FOLDER folder aldready exists, copying it to ${ZSH_FOLDER}_${DATESTR};
+		mv $ZSH_FOLDER ${ZSH_FOLDER}_${DATESTR}; 
 	fi
 
 	#move the new zsh folder into position
-	mkdir -p '$zsh_folder_without_base'
-	mv '$tmpdir'/oh-my-zsh '$zsh_folder'
+	mkdir -p $ZSH_FOLDER_WITHOUT_BASE
+	mv ${TMP_DIR}/oh-my-zsh $ZSH_FOLDER
 
 	# check for pre-existing files
 	if [ -f .zshrc ]; then 
-		mv .zshrc .zshrc_'$datestr' 
-		echo "An existing .zshrc was found. It was moved to .zshrc_'$datestr'"
+		mv .zshrc .zshrc_$DATESTR 
+		echo 'An existing .zshrc was found. It was moved to .zshrc_$DATESTR'
 	fi
 	if [ -f .gitconfig ]; then 
-		mv .gitconfig .gitconfig_'$datestr'
-		echo "An existing .gitconfig was found. It was moved to .gitconfig_'$datestr'"
+		mv .gitconfig .gitconfig_$DATESTR
+		echo 'An existing .gitconfig was found. It was moved to .gitconfig_$DATESTR'
 	fi
 
 	# move the new files into position
-	mv '$tmpdir'/.zshrc .zshrc
-	mv '$tmpdir'/.gitconfig .gitconfig
+	mv ${TMP_DIR}/.zshrc .zshrc
+	mv ${TMP_DIR}/.gitconfig .gitconfig
 
 	#check that zsh is installed
-	command -v zsh >/dev/null 2>&1
-	if [[ $? -eq 1 ]]; then
-    	echo "zsh does not appear to be installed. Your configuration is prepared, so install zsh and then change your shell using 'chsh -s /bin/zsh', and your configuration should become active."
+	command -v zsh1 >/dev/null 2>&1
+	if [[ \$? -eq 1 ]]; then
+    	echo 'zsh does not appear to be installed. Your configuration is prepared, so install zsh and then change your shell using 'chsh -s /bin/zsh', and your configuration should become active.'
 	else
 		chsh -s /bin/zsh
-	fi
+	fi"
+	echo "$remote_commands"
+	echo "Starting remote session:"
+	ssh -t $1 "echo '$remote_commands' | sh"
 fi
