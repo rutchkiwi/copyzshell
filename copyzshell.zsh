@@ -55,7 +55,7 @@ else
 	#todo: take into account usernames!!
 	ssh -t $1 '
 
-	# this will be run in *gulp* bash ?
+	# this will be run in *gulp* bash ? TODO: MAKE SURE IT DOES
 	cd ~
 	# exit on failure!
 	
@@ -84,5 +84,11 @@ else
 	mv '$tmpdir'/.zshrc .zshrc
 	mv '$tmpdir'/.gitconfig .gitconfig
 
-	chsh -s /bin/zsh'
+	#check that zsh is installed
+	command -v zsh >/dev/null 2>&1
+	if [[ $? -eq 1 ]]; then
+    	echo "zsh does not appear to be installed. Your configuration is prepared, so install zsh and then change your shell using 'chsh -s /bin/zsh', and your configuration should become active."
+	else
+		chsh -s /bin/zsh
+	fi
 fi
