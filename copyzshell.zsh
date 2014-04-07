@@ -56,7 +56,7 @@ else
 	cd ~
 	
 	# check for pre-existing zsh folder!
-	if [[ -d $ZSH_FOLDER ]]; then
+	if [ -d $ZSH_FOLDER ]; then
 		echo $ZSH_FOLDER folder aldready exists, copying it to ${ZSH_FOLDER}_${DATESTR};
 		mv $ZSH_FOLDER ${ZSH_FOLDER}_${DATESTR}; 
 	fi
