@@ -14,6 +14,8 @@ else
 		echo "Your ZSH folder "$ZSH" doesn't seem to be in your home folder. Quitting"
 		exit 1
 	fi
+
+	#TODO: run a git gc in oh-my-zsh directory
 	
 	DATESTR=$(date "+%Y-%m-%d-%H:%M:%S")
 	ZSH_FOLDER=${ZSH#$HOME/} # could be in multiple subfolders relative to $HOME TODO TEST!
@@ -35,12 +37,12 @@ else
 	TMP_DIR=/tmp/copyshell_$DATESTR
 	mkdir $TMP_DIR
 	cp -r $ZSH $TMP_DIR/oh-my-zsh
-	echo cp -r $ZSH $TMP_DIR/oh-my-zsh
+	# echo cp -r $ZSH $TMP_DIR/oh-my-zsh
 	cp .zshrc $TMP_DIR
 	cp .gitconfig $TMP_DIR
-	echo 	scp -r $TMP_DIR $1":"$TMP_DIR
+	# echo 	scp -r $TMP_DIR $1":"$TMP_DIR
 	scp -r $TMP_DIR $1":"$TMP_DIR
-	echo "files should now be in "$TMP_DIR
+	# echo "files should now be in "$TMP_DIR
 
 	# rc=$?
 	#DO NOT TRANSFER WIERD GIT FILES!
@@ -52,7 +54,6 @@ else
 	echo 'File transfer complete. We will now setup the shell via ssh.'
 
 	remote_commands="
-	set -e
 	cd ~
 	
 	# check for pre-existing zsh folder!
@@ -81,12 +82,13 @@ else
 
 	#check that zsh is installed
 	command -v zsh1 >/dev/null 2>&1
-	if [[ \$? -eq 1 ]]; then
-    	echo 'zsh does not appear to be installed. Your configuration is prepared, so install zsh and then change your shell using 'chsh -s /bin/zsh', and your configuration should become active.'
+	if [ \$? -ne 0 ]; then
+    	echo 'zsh does not appear to be installed. Your configuration is prepared, so install zsh and then change your shell using chsh -s /bin/zsh, and your configuration should become active.'
 	else
 		chsh -s /bin/zsh
+		echo Successfully copied your configuration and 
 	fi"
-	echo "$remote_commands"
+	# echo "$remote_commands"
 	echo "Starting remote session:"
 	ssh -t $1 "echo '$remote_commands' | sh"
 fi
