@@ -27,7 +27,7 @@ If you're using [Antigen](https://github.com/zsh-lovers/antigen), just add `anti
 
 ## zgen
 
-If you're using [Zgen](https://github.com/tarjoilija/zgen), just add `antigen bundle rutchkiwi/copyzshell` to your `.zshrc` along with your other plugins.
+If you're using [Zgen](https://github.com/tarjoilija/zgen), add `zgen load rutchkiwi/copyzshell` to your `.zshrc` along with your other plugins.
 
 #Usage
 ```
