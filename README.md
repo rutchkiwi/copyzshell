@@ -1,14 +1,6 @@
 #Copyzshell
 An oh-my-zsh plugin to copy oh-my-zsh and your .zshrc and .gitconfig files to a remote machine using SSH.
-
 #Installation
-
-## Antigen
-
-If you're using [Antigen](https://github.com/zsh-lovers/antigen), just add `antigen bundle rutchkiwi/copyzshell` to your `.zshrc` along with your other plugins.
-
-## oh-my-zsh
-
 1. clone this repository into your oh-my-zsh custom/plugins folder:
 
     ```zsh
@@ -24,10 +16,6 @@ If you're using [Antigen](https://github.com/zsh-lovers/antigen), just add `anti
     ```
 
 3. Restart your zsh session
-
-## zgen
-
-If you're using [Zgen](https://github.com/tarjoilija/zgen), add `zgen load rutchkiwi/copyzshell` to your `.zshrc` along with your other plugins.
 
 #Usage
 ```
