@@ -4,7 +4,7 @@ An oh-my-zsh plugin to copy oh-my-zsh and your .zshrc and .gitconfig files to a 
 1. clone this repository into your oh-my-zsh custom/plugins folder:
 
     ```zsh
-    git clone https://github.com/rutchkiwi/copyzshell.git ~ZSH_CUSTOM/plugins/deleteme
+    git clone https://github.com/rutchkiwi/copyzshell.git ~ZSH_CUSTOM/plugins/copyzshell
     ```
 
 2. Include `copyzshell` in your .zshrc file along with the rest of your plugins:
