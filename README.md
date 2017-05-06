@@ -1,6 +1,6 @@
-#Copyzshell
+# Copyzshell
 An oh-my-zsh plugin to copy oh-my-zsh and your .zshrc and .gitconfig files to a remote machine using SSH.
-#Installation
+## Installation
 1. clone this repository into your oh-my-zsh custom/plugins folder:
 
     ```zsh
@@ -17,7 +17,7 @@ An oh-my-zsh plugin to copy oh-my-zsh and your .zshrc and .gitconfig files to a 
 
 3. Restart your zsh session
 
-#Usage
+## Usage
 ```
 copyzshell <remote machine>
 ```
